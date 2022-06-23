@@ -1,0 +1,36 @@
+name: Git Diff
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review, synchronize]
+    branches:
+      - 'master'
+  push:
+    branches:
+      - 'master'
+
+jobs:
+  git-diff:
+    name: "Git Diff Branches"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Run Git Diff Branches
+        run: |
+          echo BASE_REF:
+          echo ${{ github.base_ref }}
+          echo HEAD_REF:
+          echo ${{ github.head_ref }}
+
+          FILES_TO_DEPLOY="$(git diff --name-only --diff-filter=d origin/${{github.base_ref}}..origin/${{github.head_ref}} | grep -F src | sed '$!s/$/,/' | xargs)"
+
+          echo FILES_TO_DEPLOY:
+          echo $FILES_TO_DEPLOY
+
+      - name: Run Git Diff Commits
+        run: |
+          FILES_TO_DEPLOY="$(git diff --name-only --diff-filter=d HEAD~1 HEAD | grep -F src | sed '$!s/$/,/' | xargs)"
+          echo FILES_TO_DEPLOY:
+          echo $FILES_TO_DEPLOY
