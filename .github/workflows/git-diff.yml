@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: '0'
 
       - name: Run Git Diff Branches
         run: |
@@ -31,6 +33,22 @@ jobs:
 
       - name: Run Git Diff Commits
         run: |
-          FILES_TO_DEPLOY="$(git diff --name-only --diff-filter=d HEAD~1 HEAD | grep -F src | sed '$!s/$/,/' | xargs)"
+          echo COMMIT_SHA:
+          echo ${{ github.sha }}
+
+          COMMIT_SHAS="$( git log --format=format:%H -n 2 | xargs )"
+
+          echo COMMIT_SHAS:
+          echo $COMMIT_SHAS
+
+          COMMIT_SHA_HEAD="$( echo $COMMIT_SHAS | awk '{print $1}' )"
+          COMMIT_SHA_PREVIOUS="$( echo $COMMIT_SHAS | awk '{print $2}' )"
+          echo COMMIT_SHA_HEAD:
+          echo $COMMIT_SHA_HEAD
+          echo COMMIT_SHA_PREVIOUS:
+          echo $COMMIT_SHA_PREVIOUS
+
+          FILES_TO_DEPLOY="$( git diff --name-only --diff-filter=d $COMMIT_SHA_PREVIOUS $COMMIT_SHA_HEAD | grep -F src | sed '$!s/$/,/' | xargs )"
+
           echo FILES_TO_DEPLOY:
           echo $FILES_TO_DEPLOY
