@@ -1,1 +1,3 @@
 This is a help document.
+
+Modified help document. This should not get picked up in the diff.
